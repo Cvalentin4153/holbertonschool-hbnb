@@ -11,7 +11,6 @@ class HBnBFacade:
         self.review_repo = InMemoryRepository()
         self.amenity_repo = InMemoryRepository()
 
-    # Placeholder method for creating a user
     def create_user(self, first_name, last_name, email, is_admin=False):
         if self.user_repo.get_by_attribute('email', email):
             raise ValueError("User with the same email already exists.")
@@ -33,7 +32,6 @@ class HBnBFacade:
         if not user:
             raise ValueError("User not found.")
 
-    # Only update provided fields
         for key, value in data.items():
             if value:  # Only update non-empty values
                 setattr(user, key, value)
@@ -46,7 +44,6 @@ class HBnBFacade:
             raise ValueError("User not found.")
         self.user_repo.delete(user_id)
 
-# Placeholder method for creating a place
     def create_place(self, title, description, price, latitude, longitude, owner_id):
         owner = self.user_repo.get(owner_id)
         if not owner:
@@ -72,7 +69,6 @@ class HBnBFacade:
             raise ValueError("Place not found.")
         self.place_repo.delete(place_id)
 
-    # Placeholder method for creating a review
     def list_review(self, comment, rating, place_id, user_id):
         place = self.place_repo.get(place_id)
         user = self.user_repo.get(user_id)
@@ -100,7 +96,6 @@ class HBnBFacade:
             raise ValueError("Review not found.")
         self.review_repo.delete(review_id)
 
-    # Placeholder method for creating an amenity
     def list_amenity(self, name):
         if self.amenity_repo.get_by_attribute('name', name):
             raise ValueError("Amenity already exists.")
@@ -111,6 +106,9 @@ class HBnBFacade:
     def get_amenity(self, amenity_id):
         return self.amenity_repo.get(amenity_id)
 
+    def get_all_amenities(self):
+        return self.amenity_repo.get_all()
+
     def update_amenity(self, amenity_id, data):
         amenity = self.amenity_repo.get(amenity_id)
         if not amenity:
@@ -118,11 +116,6 @@ class HBnBFacade:
         amenity.update(data)
         self.amenity_repo.update(amenity_id, data)
         return amenity
-
-    def delete_amenity(self, amenity_id):
-        if not self.amenity_repo.get(amenity_id):
-            raise ValueError("Amenity not found.")
-        self.amenity_repo.delete(amenity_id)
 
     def list_place_amenity(self, place_id, amenity_id):
         place = self.place_repo.get(place_id)
