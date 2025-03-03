@@ -69,7 +69,7 @@ class HBnBFacade:
             raise ValueError("Place not found.")
         self.place_repo.delete(place_id)
 
-    def list_review(self, comment, rating, place_id, user_id):
+    def create_review(self, comment, rating, place_id, user_id):
         place = self.place_repo.get(place_id)
         user = self.user_repo.get(user_id)
         if not place or not user:
@@ -96,7 +96,7 @@ class HBnBFacade:
             raise ValueError("Review not found.")
         self.review_repo.delete(review_id)
 
-    def list_amenity(self, name):
+    def create_amenity(self, name):
         if self.amenity_repo.get_by_attribute('name', name):
             raise ValueError("Amenity already exists.")
         amenity = Amenity(name)
