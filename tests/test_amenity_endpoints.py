@@ -1,8 +1,12 @@
 import unittest
 import requests
+import uuid
 
 class TestAmenityEndpoints(unittest.TestCase):
     BASE_URL = "http://127.0.0.1:5001/api/v1/amenities"
+
+    amen_payload = {"name": f"amen_{uuid.uuid4().hex[:6]}"}
+    resp = requests.post(BASE_URL + "/", json=amen_payload)
 
     def test_create_amenity(self):
         """Test POST /api/v1/amenities/ creates a new amenity."""
