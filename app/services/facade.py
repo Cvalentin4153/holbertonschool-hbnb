@@ -99,8 +99,8 @@ class HBnBFacade:
         if not review:
             raise ValueError("Review not found.")
 
-        if "comment" in data:
-            review.text = review.validate_comment(data["comment"])
+        if "text" in data:
+            review.text = review.validate_comment(data["text"])
         if "rating" in data:
             review.rating = review.validate_rating(data["rating"])
 

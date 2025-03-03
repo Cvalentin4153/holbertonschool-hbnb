@@ -7,17 +7,17 @@ if TYPE_CHECKING:
     from app.models.user import User
 
 class Review(BaseModel):
-    def __init__(self, comment, rating, place, user):
+    def __init__(self, text, rating, place, user):
         super().__init__()
-        self.comment = self.validate_comment(comment)
+        self.text = self.validate_comment(text)
         self.rating = self.validate_rating(rating)
         self.place = self.validate_place(place)
         self.user = self.validate_user(user)
 
-    def validate_comment(self, comment):
-        if not isinstance(comment, str) or comment.strip() == "":
+    def validate_comment(self, text):
+        if not isinstance(text, str) or text.strip() == "":
             raise ValueError("Comment can not be empty.")
-        return comment
+        return text
 
     def validate_rating(self, rating):
         if not isinstance(rating, int) or not (1 <= rating <= 5):

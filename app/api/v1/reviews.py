@@ -11,6 +11,13 @@ review_model = review_ns.model("Review", {
     "place_id": fields.String(required=True, description="ID of the place")
 })
 
+review_update_model = review_ns.model("ReviewUpdate", {
+    "text": fields.String(description="Text of the review"),
+    "rating": fields.Integer(description="Rating of the place (1-5)"),
+    "user_id": fields.String(description="ID of the user"),
+    "place_id": fields.String(description="ID of the place")
+})
+
 @review_ns.route("/")
 class ReviewList(Resource):
     @review_ns.expect(review_model)
@@ -68,7 +75,7 @@ class ReviewResource(Resource):
             "place_id": review.place.id
         }, 200
 
-    @review_ns.expect(review_model, validate=True)
+    @review_ns.expect(review_update_model, validate=True)
     @review_ns.response(200, "Review updated successfully")
     @review_ns.response(404, "Review not found")
     @review_ns.response(400, "Invalid input data")

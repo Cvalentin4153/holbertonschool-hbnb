@@ -8,7 +8,7 @@ amenity_model = amenity_ns.model('Amenity', {
     'name': fields.String(required=True, description='Name of the amenity')
 })
 
-@amenity_ns.route('')
+@amenity_ns.route('/')
 class AmenityList(Resource):
     @amenity_ns.expect(amenity_model, validate=True)
     @amenity_ns.response(201, 'Amenity successfully created')

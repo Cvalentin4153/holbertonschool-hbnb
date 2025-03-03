@@ -28,6 +28,17 @@ place_model = place_ns.model("Place", {
     "reviews": fields.List(fields.String, description="List of review IDs")
 })
 
+place_update_model = place_ns.model("PlaceUpdate", {
+    "title": fields.String(description="Title of the place"),
+    "description": fields.String(description="Description of the place"),
+    "price": fields.Float(description="Price per night"),
+    "latitude": fields.Float(description="Latitude of the place"),
+    "longitude": fields.Float(description="Longitude of the place"),
+    "owner_id": fields.String(description="ID of the owner"),
+    "amenities": fields.List(fields.String, description="List of Amenity IDs")
+})
+
+
 @place_ns.route("/")
 class PlaceList(Resource):
     @place_ns.expect(place_model, validate=True)
@@ -107,7 +118,7 @@ class PlaceResource(Resource):
             ]
         }, 200
 
-    @place_ns.expect(place_model, validate=True)
+    @place_ns.expect(place_update_model, validate=True)
     @place_ns.response(200, "Place updated successfully")
     @place_ns.response(404, "Place not found")
     @place_ns.response(400, "Invalid input data")
