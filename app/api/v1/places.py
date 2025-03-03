@@ -24,7 +24,8 @@ place_model = place_ns.model("Place", {
     "latitude": fields.Float(required=True, description="Latitude of the place"),
     "longitude": fields.Float(required=True, description="Longitude of the place"),
     "owner_id": fields.String(required=True, description="ID of the owner"),
-    "amenities": fields.List(fields.String, required=False, description="List of Amenity IDs")
+    "amenities": fields.List(fields.String, required=False, description="List of Amenity IDs"),
+    "reviews": fields.List(fields.String, description="List of review IDs")
 })
 
 @place_ns.route("/")
@@ -72,7 +73,8 @@ class PlaceList(Resource):
                 "latitude": p.latitude,
                 "longitude": p.longitude,
                 "owner_id": p.owner.id,
-                "amenities": [a.id for a in p.amenities]
+                "amenities": [a.id for a in p.amenities],
+                "reviews": [r.id for r in p.reviews]
             })
         return results, 200
 

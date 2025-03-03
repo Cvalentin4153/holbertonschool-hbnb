@@ -10,6 +10,12 @@ user_model = user_ns.model("User", {
     "email": fields.String(required=True, description="Email of the user")
 })
 
+user_update_model = user_ns.model("UserUpdate", {
+    "first_name": fields.String(description="First name"),
+    "last_name": fields.String(description="Last name"),
+    "email": fields.String(description="Email")
+})
+
 @user_ns.route("/")
 class UserList(Resource):
     @user_ns.expect(user_model, validate=True)
@@ -56,7 +62,7 @@ class UserResource(Resource):
             "email": user.email
         }, 200
 
-    @user_ns.expect(user_model, validate=True)
+    @user_ns.expect(user_update_model, validate=True)
     @user_ns.response(200, "User updated successfully")
     @user_ns.response(404, "User not found")
     @user_ns.response(400, "Invalid input data")

@@ -67,26 +67,45 @@ class HBnBFacade:
         self.place_repo.update(place_id, data)
         return place
 
-    def create_review(self, comment, rating, place_id, user_id):
-        place = self.place_repo.get(place_id)
+    def create_review(self, text, rating, user_id, place_id):
         user = self.user_repo.get(user_id)
-        if not place or not user:
-            raise ValueError("Place or user not found.")
-        review = Review(comment, rating, place, user)
-        self.review_repo.add(review)
-        place.add_review(review)
-        user.add_review(review)
-        return review
+        if not user:
+            raise ValueError("User does not exist.")
 
+        place = self.place_repo.get(place_id)
+        if not place:
+            raise ValueError("Place does not exist.")
+
+        review = Review(text, rating, place, user)
+        self.review_repo.add(review)
+
+        place.reviews.append(review)
+
+        return review
     def get_review(self, review_id):
         return self.review_repo.get(review_id)
+
+    def get_all_reviews(self):
+        return self.review_repo.get_all()
+
+    def get_reviews_by_place(self, place_id):
+        place = self.place_repo.get(place_id)
+        if not place:
+            raise ValueError("Place not found.")
+        return place.reviews
 
     def update_review(self, review_id, data):
         review = self.review_repo.get(review_id)
         if not review:
             raise ValueError("Review not found.")
-        review.update(data)
+
+        if "comment" in data:
+            review.text = review.validate_comment(data["comment"])
+        if "rating" in data:
+            review.rating = review.validate_rating(data["rating"])
+
         self.review_repo.update(review_id, data)
+        review.save()
         return review
 
     def create_amenity(self, name):
