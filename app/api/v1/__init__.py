@@ -16,7 +16,9 @@ api = Api(
 # Import namespaces (routes)
 from app.api.v1.users import user_ns
 from app.api.v1.amenities import amenity_ns
+from app.api.v1.places import place_ns
 
 # Add namespaces to API
 api.add_namespace(user_ns, path="/users")
 api.add_namespace(amenity_ns, path="/amenities")
+api.add_namespace(place_ns, path="/places")

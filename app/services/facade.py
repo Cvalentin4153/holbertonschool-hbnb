@@ -39,22 +39,25 @@ class HBnBFacade:
         self.user_repo.update(user_id, data)
         return user
 
-    def delete_user(self, user_id):
-        if not self.user_repo.get(user_id):
-            raise ValueError("User not found.")
-        self.user_repo.delete(user_id)
-
-    def create_place(self, title, description, price, latitude, longitude, owner_id):
+    def create_place(self, title, description, price, latitude, longitude,owner_id, amenities=None):
         owner = self.user_repo.get(owner_id)
         if not owner:
             raise ValueError("Owner not found.")
         place = Place(title, description, price, latitude, longitude, owner)
         self.place_repo.add(place)
         owner.add_place(place)
+        if amenities:
+            for amenity_id in amenities:
+                amenity_obj = self.amenity_repo.get(amenity_id)
+                if amenity_obj:
+                    place.add_amenity(amenity_obj)
         return place
 
     def get_place(self, place_id):
         return self.place_repo.get(place_id)
+
+    def get_all_places(self):
+        return self.place_repo.get_all()
 
     def update_place(self, place_id, data):
         place = self.place_repo.get(place_id)
@@ -63,11 +66,6 @@ class HBnBFacade:
         place.update(data)
         self.place_repo.update(place_id, data)
         return place
-
-    def delete_place(self, place_id):
-        if not self.place_repo.get(place_id):
-            raise ValueError("Place not found.")
-        self.place_repo.delete(place_id)
 
     def create_review(self, comment, rating, place_id, user_id):
         place = self.place_repo.get(place_id)
@@ -90,11 +88,6 @@ class HBnBFacade:
         review.update(data)
         self.review_repo.update(review_id, data)
         return review
-
-    def delete_review(self, review_id):
-        if not self.review_repo.get(review_id):
-            raise ValueError("Review not found.")
-        self.review_repo.delete(review_id)
 
     def create_amenity(self, name):
         if self.amenity_repo.get_by_attribute('name', name):
