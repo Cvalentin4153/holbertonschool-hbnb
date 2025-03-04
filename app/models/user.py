@@ -16,6 +16,8 @@ class User(BaseModel):
     def validate_name(self, name):
         if not isinstance(name, str):
             raise TypeError(f"{name} must be of type str")
+        if not name.strip():
+            raise ValueError("Name can not be empty.")
         return name
 
     def validate_email(self, email):
