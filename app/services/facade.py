@@ -11,10 +11,10 @@ class HBnBFacade:
         self.review_repo = InMemoryRepository()
         self.amenity_repo = InMemoryRepository()
 
-    def create_user(self, first_name, last_name, email, is_admin=False):
+    def create_user(self, first_name, last_name, email, password, is_admin=False):
         if self.user_repo.get_by_attribute('email', email):
             raise ValueError("User with the same email already exists.")
-        user = User(first_name, last_name, email, is_admin)
+        user = User(first_name, last_name, email, password, is_admin)
         self.user_repo.add(user)
         return user
 
