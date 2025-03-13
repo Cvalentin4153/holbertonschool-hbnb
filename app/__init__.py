@@ -1,9 +1,11 @@
 from flask import Flask
 from flask_restx import Api
+from flask_sqlalchemy import SQLAlchemy
 from app.api.v1.__init__ import v1_bp
 from flask_bcrypt import Bcrypt
 
 bcrypt = Bcrypt()
+db = SQLAlchemy()
 
 def create_app(config_class="config.DevelopmentConfig"):
     app = Flask(__name__)
