@@ -2,11 +2,18 @@ import re
 from app.models.__init__ import BaseModel
 from app.models.place import Place
 from app.models.review import Review
-from flask_bcrypt import Bcrypt
+from app import db, bcrypt
 
-bcrypt = Bcrypt()
 
 class User(BaseModel):
+    __tablename__ = 'users'
+
+    first_name = db.column(db.String(50), nullable=False)
+    last_name = db.column(db.String(50), nullable=False)
+    email = db.column(db.String(120), nullable=False, unique=True)
+    password = db.column(db.String(128), nullable=False)
+    is_admin = db.column(db.Boolean, default=False)
+
     def __init__(self, first_name, last_name, email, password, is_admin=False,):
         super().__init__()
         self.first_name = self.validate_name(first_name)
