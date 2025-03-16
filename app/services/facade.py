@@ -1,4 +1,5 @@
 from app.persistence.repository import SQLAlchemyRepository
+from app.persistence.user_repository import UserRepository
 from app.models.user import User
 from app.models.place import Place
 from app.models.review import Review
@@ -6,15 +7,20 @@ from app.models.amenity import Amenity
 
 class HBnBFacade:
     def __init__(self):
-        self.user_repo = SQLAlchemyRepository(User)
+        self.user_repo = UserRepository()
         self.place_repo = SQLAlchemyRepository(Place)
         self.review_repo = SQLAlchemyRepository(Review)
         self.amenity_repo = SQLAlchemyRepository(Amenity)
 
     def create_user(self, first_name, last_name, email, password, is_admin=False):
-        if self.user_repo.get_by_attribute('email', email):
-            raise ValueError("User with the same email already exists.")
-        user = User(first_name, last_name, email, password, is_admin)
+        user = User(
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            password=password,
+            is_admin=is_admin
+        )
+        user.hash_password(password)
         self.user_repo.add(user)
         return user
 
@@ -22,22 +28,8 @@ class HBnBFacade:
         return self.user_repo.get(user_id)
 
     def get_user_by_email(self, email):
-        return self.user_repo.get_by_attribute('email', email)
+        return self.user_repo.get_user_by_email(email)
 
-    def get_all_users(self):
-        return self.user_repo.get_all()
-
-    def update_user(self, user_id, data):
-        user = self.user_repo.get(user_id)
-        if not user:
-            raise ValueError("User not found.")
-
-        for key, value in data.items():
-            if value:  # Only update non-empty values
-                setattr(user, key, value)
-
-        self.user_repo.update(user_id, data)
-        return user
 
     def create_place(self, title, description, price, latitude, longitude,owner_id, amenities=None):
         owner = self.user_repo.get(owner_id)

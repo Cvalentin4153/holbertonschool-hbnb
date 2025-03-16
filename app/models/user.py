@@ -1,18 +1,18 @@
 import re
-from app.models.__init__ import BaseModel
+from app.models.basemodel import BaseModel
 from app.models.place import Place
 from app.models.review import Review
-from app import db, bcrypt
+from extensions import db, bcrypt
 
 
 class User(BaseModel):
     __tablename__ = 'users'
 
-    first_name = db.column(db.String(50), nullable=False)
-    last_name = db.column(db.String(50), nullable=False)
-    email = db.column(db.String(120), nullable=False, unique=True)
-    password = db.column(db.String(128), nullable=False)
-    is_admin = db.column(db.Boolean, default=False)
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(120), nullable=False, unique=True)
+    password = db.Column(db.String(128), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
 
     def __init__(self, first_name, last_name, email, password, is_admin=False,):
         super().__init__()
@@ -20,7 +20,7 @@ class User(BaseModel):
         self.last_name = self.validate_name(last_name)
         self.email = self.validate_email(email)
         self.is_admin = bool(is_admin)
-        self.password = password
+        self.password = self.hash_password(password)
         self.places = []
         self.reviews = []
 
@@ -49,10 +49,10 @@ class User(BaseModel):
         else:
             raise ValueError("Invalid review or user mismatch.")
 
-def hash_password(self, password):
-    """Hashes the password before storing it."""
-    self.password = bcrypt.generate_password_hash(password).decode('utf-8')
+    def hash_password(self, password):
+        """Hashes the password before storing it."""
+        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
 
-def verify_password(self, password):
-    """Verifies if the provided password matches the hashed password."""
-    return bcrypt.check_password_hash(self.password, password)
+    def verify_password(self, password):
+        """Verifies if the provided password matches the hashed password."""
+        return bcrypt.check_password_hash(self.password, password)

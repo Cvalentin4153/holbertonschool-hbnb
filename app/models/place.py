@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from app.models.__init__ import BaseModel
+from app.models.basemodel import BaseModel
 from app.models.amenity import Amenity
 
 if TYPE_CHECKING:
