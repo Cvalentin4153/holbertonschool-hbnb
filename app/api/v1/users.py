@@ -14,8 +14,7 @@ user_model = user_ns.model("User", {
 
 user_update_model = user_ns.model("UserUpdate", {
     "first_name": fields.String(description="First name"),
-    "last_name": fields.String(description="Last name"),
-    "email": fields.String(description="Email")
+    "last_name": fields.String(description="Last name")
 })
 
 @user_ns.route("/")
@@ -36,14 +35,14 @@ class UserList(Resource):
                 "id": new_user.id,
                 "first_name": new_user.first_name,
                 "last_name": new_user.last_name,
-                "email": new_user.email,
-                "password": new_user.password
+                "email": new_user.email
             }, 201
         except TypeError as e:
             return {"error": str(e)}, 400
         except ValueError as e:
             return {"error": str(e)}, 400
 
+    @jwt_required()
     @user_ns.response(200, "Users retrieved successfully")
     def get(self):
         users = facade.get_all_users()
@@ -56,6 +55,7 @@ class UserList(Resource):
 
 @user_ns.route("/<string:user_id>")
 class UserResource(Resource):
+    @jwt_required()
     @user_ns.response(200, "User details retrieved successfully")
     @user_ns.response(404, "User not found")
     def get(self, user_id):
@@ -69,12 +69,20 @@ class UserResource(Resource):
             "email": user.email
         }, 200
 
+    @jwt_required()
     @user_ns.expect(user_update_model, validate=True)
     @user_ns.response(200, "User updated successfully")
     @user_ns.response(404, "User not found")
     @user_ns.response(400, "Invalid input data")
+    @user_ns.response(403, "Unauthorized action")
     def put(self, user_id):
+        current_user_id = get_jwt_identity()
+        if user_id != current_user_id:
+            return {"error": "Unauthorized action"}, 403
+            
         data = request.json
+        if "email" in data or "password" in data:
+            return {"error": "You cannot modify email or password"}, 400
 
         try:
             updated_user = facade.update_user(user_id, data)
@@ -87,12 +95,36 @@ class UserResource(Resource):
         except ValueError as e:
             return {"error": str(e)}, 404
 
+@user_ns.route("/me")
+class CurrentUser(Resource):
+    @jwt_required()
+    @user_ns.response(200, "Current user details retrieved successfully")
+    @user_ns.response(404, "User not found")
+    def get(self):
+        """Get current user's profile."""
+        current_user_id = get_jwt_identity()
+        user = facade.get_user(current_user_id)
+        if not user:
+            return {"error": "User not found"}, 404
+        return {
+            "id": user.id,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email
+        }, 200
+
 @user_ns.route("/<string:user_id>/places")
 class UserPlacesResource(Resource):
+    @jwt_required()
     @user_ns.response(200, "User's places retrieved successfully")
     @user_ns.response(404, "User not found")
+    @user_ns.response(403, "Unauthorized action")
     def get(self, user_id):
         """Get all places owned by a user."""
+        current_user_id = get_jwt_identity()
+        if user_id != current_user_id:
+            return {"error": "Unauthorized action"}, 403
+            
         user = facade.get_user(user_id)
         if not user:
             return {"error": "User not found"}, 404
@@ -109,21 +141,3 @@ class UserPlacesResource(Resource):
         } for place in user.places]
         
         return places, 200
-
-@user_ns.route("/me")
-class CurrentUser(Resource):
-    @jwt_required()
-    @user_ns.response(200, "Current user details retrieved successfully")
-    @user_ns.response(404, "User not found")
-    def get(self):
-        """Get current user's profile."""
-        current_user_id = get_jwt_identity()  # Now returns the user ID directly
-        user = facade.get_user(current_user_id)
-        if not user:
-            return {"error": "User not found"}, 404
-        return {
-            "id": user.id,
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "email": user.email
-        }, 200

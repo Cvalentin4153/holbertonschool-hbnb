@@ -1,6 +1,7 @@
 from flask_restx import Namespace, Resource, fields
 from flask import request
 from app.services import facade
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 place_ns = Namespace("places", description="Place operations")
 
@@ -23,7 +24,6 @@ place_model = place_ns.model("Place", {
     "price": fields.Float(required=True, description="Price per night"),
     "latitude": fields.Float(required=True, description="Latitude of the place"),
     "longitude": fields.Float(required=True, description="Longitude of the place"),
-    "owner_id": fields.String(required=True, description="ID of the owner"),
     "amenities": fields.List(fields.String, required=False, description="List of Amenity IDs"),
     "reviews": fields.List(fields.String, description="List of review IDs")
 })
@@ -34,19 +34,20 @@ place_update_model = place_ns.model("PlaceUpdate", {
     "price": fields.Float(description="Price per night"),
     "latitude": fields.Float(description="Latitude of the place"),
     "longitude": fields.Float(description="Longitude of the place"),
-    "owner_id": fields.String(description="ID of the owner"),
     "amenities": fields.List(fields.String, description="List of Amenity IDs")
 })
 
 
 @place_ns.route("/")
 class PlaceList(Resource):
+    @jwt_required()
     @place_ns.expect(place_model, validate=True)
     @place_ns.response(201, "Place successfully created")
     @place_ns.response(400, "Invalid input data")
     def post(self):
         """Register a new place."""
         data = request.json
+        current_user_id = get_jwt_identity()
         try:
             new_place = facade.create_place(
                 title=data["title"],
@@ -54,7 +55,7 @@ class PlaceList(Resource):
                 price=data["price"],
                 latitude=data["latitude"],
                 longitude=data["longitude"],
-                owner_id=data["owner_id"],
+                owner_id=current_user_id,
                 amenities=data.get("amenities", [])
             )
             return {
@@ -121,12 +122,22 @@ class PlaceResource(Resource):
             ]
         }, 200
 
+    @jwt_required()
     @place_ns.expect(place_update_model, validate=True)
     @place_ns.response(200, "Place updated successfully")
     @place_ns.response(404, "Place not found")
     @place_ns.response(400, "Invalid input data")
+    @place_ns.response(403, "Unauthorized action")
     def put(self, place_id):
         """Update a place's information."""
+        current_user_id = get_jwt_identity()
+        place = facade.get_place(place_id)
+        if not place:
+            return {"error": "Place not found"}, 404
+            
+        if place.owner_id != current_user_id:
+            return {"error": "Unauthorized action"}, 403
+            
         data = request.json
         try:
             updated_place = facade.update_place(place_id, data)
@@ -145,10 +156,20 @@ class PlaceResource(Resource):
 
 @place_ns.route("/<string:place_id>/amenities/<string:amenity_id>")
 class PlaceAmenityResource(Resource):
+    @jwt_required()
     @place_ns.response(200, "Amenity linked to place successfully")
     @place_ns.response(404, "Place or amenity not found")
+    @place_ns.response(403, "Unauthorized action")
     def post(self, place_id, amenity_id):
         """Link an amenity to a place."""
+        current_user_id = get_jwt_identity()
+        place = facade.get_place(place_id)
+        if not place:
+            return {"error": "Place not found"}, 404
+            
+        if place.owner_id != current_user_id:
+            return {"error": "Unauthorized action"}, 403
+            
         try:
             facade.link_amenity_to_place(place_id, amenity_id)
             return {"message": "Amenity linked successfully"}, 200
