@@ -1,6 +1,7 @@
 from flask_restx import Namespace, Resource, fields
 from flask import request
 from app.services import facade
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 user_ns = Namespace("users", description="User management endpoints")
 
@@ -108,3 +109,21 @@ class UserPlacesResource(Resource):
         } for place in user.places]
         
         return places, 200
+
+@user_ns.route("/me")
+class CurrentUser(Resource):
+    @jwt_required()
+    @user_ns.response(200, "Current user details retrieved successfully")
+    @user_ns.response(404, "User not found")
+    def get(self):
+        """Get current user's profile."""
+        current_user_id = get_jwt_identity()  # Now returns the user ID directly
+        user = facade.get_user(current_user_id)
+        if not user:
+            return {"error": "User not found"}, 404
+        return {
+            "id": user.id,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email
+        }, 200

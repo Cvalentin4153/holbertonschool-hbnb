@@ -35,6 +35,20 @@ class HBnBFacade:
     def get_user_by_email(self, email):
         return self.user_repo.get_user_by_email(email)
 
+    def update_user(self, user_id, data):
+        user = self.get_user(user_id)
+        if not user:
+            raise ValueError("User not found")
+        
+        if "first_name" in data:
+            user.first_name = user.validate_name(data["first_name"])
+        if "last_name" in data:
+            user.last_name = user.validate_name(data["last_name"])
+        if "email" in data:
+            user.email = user.validate_email(data["email"])
+        
+        self.user_repo.update(user_id, data)
+        return user
 
     def create_place(self, title, description, price, latitude, longitude,owner_id, amenities=None):
         owner = self.user_repo.get(owner_id)
@@ -120,6 +134,21 @@ class HBnBFacade:
         self.review_repo.update(review_id, data)
         review.save()
         return review
+
+    def delete_review(self, review_id):
+        """Delete a review by ID."""
+        review = self.review_repo.get(review_id)
+        if not review:
+            raise ValueError("Review not found.")
+        
+        # Remove the review from the place's reviews list
+        if review.place:
+            review.place.reviews.remove(review)
+        
+        # Delete the review
+        self.review_repo.delete(review_id)
+        from extensions import db
+        db.session.commit()
 
     def create_amenity(self, name):
         if self.amenity_repo.get_by_attribute('name', name):
