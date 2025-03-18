@@ -24,6 +24,7 @@ class User(BaseModel):
         self.places = []
         self.reviews = []
 
+
     def validate_name(self, name):
         if not isinstance(name, str):
             raise TypeError(f"{name} must be of type str")

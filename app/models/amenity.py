@@ -1,6 +1,12 @@
 from app.models.basemodel import BaseModel
+from extensions import db
 
 class Amenity(BaseModel):
+    __tablename__ = "amenity"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+
     def __init__(self, name):
         super().__init__()
         self.name = self.validate_name(name)

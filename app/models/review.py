@@ -1,12 +1,19 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from app.models.basemodel import BaseModel
+from extensions import db
 
 if TYPE_CHECKING:
     from app.models.place import Place
     from app.models.user import User
 
 class Review(BaseModel):
+    __tablename__ = "reviews"
+
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.String(255), nullable=False)
+    rating = db.Column(db.Integer, nullable=False)
+
     def __init__(self, text, rating, place, user):
         super().__init__()
         self.text = self.validate_comment(text)
