@@ -115,6 +115,9 @@ class PlaceResource(Resource):
             },
             "amenities": [
                 {"id": a.id, "name": a.name} for a in place.amenities
+            ],
+            "reviews": [
+                {"id": r.id, "text": r.text, "rating": r.rating, "user_id": r.user_id} for r in place.reviews
             ]
         }, 200
 
@@ -137,5 +140,17 @@ class PlaceResource(Resource):
                 "owner_id": updated_place.owner.id,
                 "amenities": [a.id for a in updated_place.amenities]
             }, 200
+        except ValueError as e:
+            return {"error": str(e)}, 404
+
+@place_ns.route("/<string:place_id>/amenities/<string:amenity_id>")
+class PlaceAmenityResource(Resource):
+    @place_ns.response(200, "Amenity linked to place successfully")
+    @place_ns.response(404, "Place or amenity not found")
+    def post(self, place_id, amenity_id):
+        """Link an amenity to a place."""
+        try:
+            facade.link_amenity_to_place(place_id, amenity_id)
+            return {"message": "Amenity linked successfully"}, 200
         except ValueError as e:
             return {"error": str(e)}, 404

@@ -85,3 +85,26 @@ class UserResource(Resource):
             }, 200
         except ValueError as e:
             return {"error": str(e)}, 404
+
+@user_ns.route("/<string:user_id>/places")
+class UserPlacesResource(Resource):
+    @user_ns.response(200, "User's places retrieved successfully")
+    @user_ns.response(404, "User not found")
+    def get(self, user_id):
+        """Get all places owned by a user."""
+        user = facade.get_user(user_id)
+        if not user:
+            return {"error": "User not found"}, 404
+            
+        places = [{
+            "id": place.id,
+            "title": place.title,
+            "description": place.description,
+            "price": place.price,
+            "latitude": place.latitude,
+            "longitude": place.longitude,
+            "amenities": [{"id": a.id, "name": a.name} for a in place.amenities],
+            "reviews": [{"id": r.id, "text": r.text, "rating": r.rating} for r in place.reviews]
+        } for place in user.places]
+        
+        return places, 200

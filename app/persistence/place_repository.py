@@ -31,3 +31,19 @@ class PlaceRepository(SQLAlchemyRepository):
             db.session.delete(place)
             db.session.commit()
         return place
+
+    def add_amenity(self, place, amenity):
+        place.amenities.append(amenity)
+        db.session.commit()
+
+    def remove_amenity(self, place, amenity):
+        place.amenities.remove(amenity)
+        db.session.commit
+
+    def add_review(self, place, review):
+        place.reviews.append(review)
+        db.session.commit()
+
+    def remove_review(self, place, review):
+        place.reviews.remove(review)
+        db.session.commit()

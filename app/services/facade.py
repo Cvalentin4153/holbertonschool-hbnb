@@ -60,8 +60,24 @@ class HBnBFacade:
         place = self.place_repo.get(place_id)
         if not place:
             raise ValueError("Place not found.")
-        place.update(data)
-        self.place_repo.update(place_id, data)
+        
+        # Handle amenities separately
+        amenities = data.pop('amenities', None)
+        
+        # Update other fields
+        for key, value in data.items():
+            setattr(place, key, value)
+            
+        # Update amenities if provided
+        if amenities is not None:
+            place.amenities = []
+            for amenity_id in amenities:
+                amenity = self.amenity_repo.get(amenity_id)
+                if amenity:
+                    place.amenities.append(amenity)
+                    
+        from extensions import db
+        db.session.commit()
         return place
 
     def create_review(self, text, rating, user_id, place_id):
@@ -132,3 +148,15 @@ class HBnBFacade:
         if not place or not amenity:
             raise ValueError("Place or amenity not found.")
         place.add_amenity(amenity)
+
+    def link_amenity_to_place(self, place_id: str, amenity_id: str) -> Place:
+        """Link an amenity to a place."""
+        place = self.place_repo.get(place_id)
+        amenity = self.amenity_repo.get(amenity_id)
+        if not place or not amenity:
+            raise ValueError("Place or Amenity not found.")
+
+        place.amenities.append(amenity)
+        from extensions import db
+        db.session.commit()
+        return place

@@ -2,12 +2,33 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from app.models.basemodel import BaseModel
 from app.models.amenity import Amenity
+from app.models.associations import places_amenities
+from extensions import db
+from datetime import datetime
+from sqlalchemy.orm import relationship
 
 if TYPE_CHECKING:
     from app.models.review import Review
     from app.models.user import User
 
+
 class Place(BaseModel):
+    __tablename__ = "places"
+
+    id = db.Column(db.String(50), primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, default="")
+    price = db.Column(db.Float, default=0)
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
+    owner_id = db.Column(db.String(50), db.ForeignKey("users.id"), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    owner = relationship("User", back_populates="places")
+    reviews = relationship("Review", back_populates="place", cascade="all, delete-orphan")
+    amenities = relationship("Amenity", secondary=places_amenities, back_populates="places")
+
     def __init__(self, title, description, price, latitude, longitude, owner):
         super().__init__()
         self.title = self.validate_title(title)
