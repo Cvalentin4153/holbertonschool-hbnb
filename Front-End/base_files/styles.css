@@ -1,0 +1,308 @@
+/* 
+  This is a SAMPLE File to get you started. Follow the instructions on the project to complete the tasks. 
+  You'll probably need to override some of theese styles.
+*/
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    background-color: #f4f4f4;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header {
+    background-color: #ff9c04;
+    color: #fff;
+    height: 60px;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+nav a {
+    color: #fff;
+    text-decoration: none;
+    margin-left: 1rem;
+}
+
+main {
+    padding: 2rem;
+    flex: 1;
+}
+
+footer {
+    background-color: #ff9c04;
+    color: #fff;
+    text-align: center;
+    padding: 1rem;
+    margin-top: auto;
+}
+
+.logo {
+    width: 110px;
+    height: 50px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.login-button {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1rem;
+}
+
+.title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.filter {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 2rem;
+    gap: 10px;
+}
+
+.price-filter-button {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    min-width: 80px;
+    text-align: center;
+    background-color: white;
+}
+
+/* Places List Styles */
+.places-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.place-card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.place-card h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+}
+
+.place-card p {
+    margin: 0.5rem 0;
+    font-size: 1.1rem;
+}
+
+.details-button {
+    background-color: #ff9c04;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 1rem;
+}
+
+/* Place Details Styles */
+.place-details {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+    text-align: center;
+}
+
+.place-info {
+    margin: 20px 0;
+    line-height: 1.6;
+}
+
+.place-info p {
+    margin: 10px 0;
+}
+
+.reviews {
+    margin-top: 2rem;
+}
+
+.reviews h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.review-card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.review-card p {
+    margin: 10px 0;
+}
+
+.rating {
+    font-weight: bold;
+}
+
+/* Add Review Form Styles */
+.add-review {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form label {
+    font-weight: bold;
+}
+
+.form textarea {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    min-height: 100px;
+}
+
+.form button {
+    background-color: #ff9c04;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+/* Login Form Styles */
+#login-form {
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+#login-form h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #333;
+}
+
+#login-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+#login-form input {
+    width: 100%;
+    padding: 0.8rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+#login-form button {
+    width: 100%;
+    padding: 0.8rem;
+    background-color: #ff9c04;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#login-form button:hover {
+    background-color: #e08a00;
+}
+
+.error-message {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 0.8rem;
+    margin-bottom: 1.5rem;
+    border-radius: 5px;
+    border-left: 4px solid #c62828;
+    font-size: 0.9rem;
+}
+
+.success-message {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    padding: 0.8rem;
+    margin-bottom: 1.5rem;
+    border-radius: 5px;
+    border-left: 4px solid #2e7d32;
+    font-size: 0.9rem;
+}
+
+.loading-message {
+    padding: 0.8rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.no-places {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.2rem;
+    color: #666;
+    width: 100%;
+}
+
+.places-list .loading-message,
+.places-list .error-message {
+    text-align: center;
+    padding: 2rem;
+    grid-column: 1 / -1;
+    width: 100%;
+}
+
+.places-list .error-message {
+    background-color: #ffebee;
+    color: #c62828;
+    border-radius: 5px;
+    border-left: 4px solid #c62828;
+    margin: 1rem auto;
+    max-width: 600px;
+}
+  
