@@ -15,11 +15,13 @@ html, body {
 }
 
 body {
-    background-color: #f4f4f4;
+    background-color: #f8f8f8;
     color: #333;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
 }
 
 header {
@@ -41,6 +43,8 @@ nav a {
 main {
     padding: 2rem;
     flex: 1;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 footer {
@@ -57,6 +61,10 @@ footer {
     display: flex;
     justify-content: flex-start;
     align-items: center;
+}
+
+.logo img {
+    height: 40px;
 }
 
 .login-button {
@@ -139,12 +147,16 @@ footer {
 }
 
 .place-info {
-    margin: 20px 0;
-    line-height: 1.6;
+    background: #fff;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .place-info p {
-    margin: 10px 0;
+    margin-bottom: 1rem;
+    line-height: 1.5;
 }
 
 .reviews {
@@ -157,53 +169,119 @@ footer {
 }
 
 .review-card {
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 20px;
-    margin: 20px 0;
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .review-card p {
-    margin: 10px 0;
+    margin-bottom: 0.5rem;
 }
 
 .rating {
-    font-weight: bold;
+    color: #ff9c04;
+    font-weight: 500;
 }
 
 /* Add Review Form Styles */
 .add-review {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+.form-group {
+    margin-bottom: 1.5rem;
 }
 
-.form label {
-    font-weight: bold;
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #333;
 }
 
-.form textarea {
-    padding: 10px;
+textarea {
+    width: 100%;
+    min-height: 150px;
+    padding: 0.75rem;
     border: 1px solid #ddd;
-    border-radius: 5px;
-    min-height: 100px;
+    border-radius: 4px;
+    resize: vertical;
+    font-family: inherit;
 }
 
-.form button {
+select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+    font-size: 1rem;
+}
+
+.submit-button {
+    width: 100%;
+    padding: 1rem;
     background-color: #ff9c04;
     color: white;
     border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.submit-button:hover {
+    background-color: #e08a00;
+}
+
+/* Or separator and detailed review link */
+.or-separator {
+    text-align: center;
+    margin: 15px 0;
+    position: relative;
+    color: #777;
+}
+
+.or-separator::before,
+.or-separator::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 45%;
+    height: 1px;
+    background-color: #ddd;
+}
+
+.or-separator::before {
+    left: 0;
+}
+
+.or-separator::after {
+    right: 0;
+}
+
+.button-link {
+    display: inline-block;
+    background-color: #4a90e2;
+    color: white;
+    text-decoration: none;
     border-radius: 5px;
     padding: 10px 20px;
-    cursor: pointer;
     font-size: 1rem;
+    text-align: center;
+    margin: 5px 0;
+    width: 100%;
+    transition: background-color 0.3s;
+}
+
+.button-link:hover {
+    background-color: #357dcb;
 }
 
 /* Login Form Styles */
@@ -304,5 +382,100 @@ footer {
     border-left: 4px solid #c62828;
     margin: 1rem auto;
     max-width: 600px;
+}
+
+/* Add review page styles */
+.review-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+#review-title {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    color: #333;
+}
+
+h1, h2 {
+    color: #333;
+    margin-bottom: 1.5rem;
+}
+
+/* Auth and Form Styles */
+.auth-container {
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.auth-container h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.error-message {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    border-radius: 5px;
+    border-left: 4px solid #c62828;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.submit-button {
+    width: 100%;
+    padding: 0.8rem;
+    background-color: #ff9c04;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.submit-button:hover {
+    background-color: #e08a00;
+}
+
+.auth-link {
+    text-align: center;
+    margin-top: 1.5rem;
+}
+
+.auth-link a {
+    color: #ff9c04;
+    text-decoration: none;
+}
+
+.auth-link a:hover {
+    text-decoration: underline;
 }
   

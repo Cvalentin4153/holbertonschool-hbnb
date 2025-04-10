@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Place Details</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="index.html">
+                <img src="images/logo.png" alt="hbnb">
+            </a>
+        </div>
+        <nav>
+            <a href="login.html" id="login-link" class="login-button">Login</a>
+        </nav>
+    </header>
+
+    <main>
+        <div id="place-loading" class="loading-message">Loading place details...</div>
+        
+        <div id="place-content" style="display: none;">
+            <h1 id="place-title" class="title"></h1>
+            
+            <div class="place-info">
+                <p><strong>Host:</strong> <span id="place-host"></span></p>
+                <p><strong>Price per night:</strong> <span id="place-price"></span></p>
+                <p><strong>Description:</strong> <span id="place-description"></span></p>
+                <p><strong>Amenities:</strong> <span id="place-amenities"></span></p>
+            </div>
+
+            <section class="reviews">
+                <h2>Reviews</h2>
+                <div id="reviews-list">
+                    <!-- Reviews will be loaded dynamically -->
+                </div>
+                
+                <div id="add-review-container" style="display: none;">
+                    <h2>Add a Review</h2>
+                    <form id="review-form" class="form">
+                        <div class="form-group">
+                            <label for="review-text">Your Review:</label>
+                            <textarea id="review-text" name="review" required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="rating">Rating:</label>
+                            <select id="rating" name="rating" required>
+                                <option value="1">1 Star</option>
+                                <option value="2">2 Stars</option>
+                                <option value="3">3 Stars</option>
+                                <option value="4">4 Stars</option>
+                                <option value="5" selected>5 Stars</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="submit-button">Submit Review</button>
+                    </form>
+                    
+                    <p class="or-separator">or</p>
+                    <a id="add-review-link" href="#" class="button-link">Write a more detailed review</a>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2024 HBnB Evolution. All rights reserved.</p>
+    </footer>
+    
+    <script src="scripts.js"></script>
+</body>
+</html>
