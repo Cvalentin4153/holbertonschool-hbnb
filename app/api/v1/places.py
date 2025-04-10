@@ -1,7 +1,9 @@
 from flask_restx import Namespace, Resource, fields
 from flask import request
 from app.services import facade
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
+from flask_cors import cross_origin
+from flask import current_app
 
 place_ns = Namespace("places", description="Place operations")
 
@@ -44,11 +46,23 @@ class PlaceList(Resource):
     @place_ns.expect(place_model, validate=True)
     @place_ns.response(201, "Place successfully created")
     @place_ns.response(400, "Invalid input data")
+    @cross_origin()
     def post(self):
         """Register a new place."""
         data = request.json
-        current_user_id = get_jwt_identity()
+        current_user_id = get_jwt_identity()  # This will now be the string user ID
+        
+        # Log the current user ID for debugging
+        current_app.logger.debug(f"User ID from token: {current_user_id}")
+        
+        if not current_user_id:
+            return {"error": "User ID not found in token"}, 401
+            
         try:
+            # Log the data being sent to create_place
+            current_app.logger.debug(f"Creating place with data: {data}")
+            current_app.logger.debug(f"Owner ID: {current_user_id}")
+            
             new_place = facade.create_place(
                 title=data["title"],
                 description=data.get("description", ""),
@@ -69,9 +83,16 @@ class PlaceList(Resource):
                 "amenities": [a.id for a in new_place.amenities]
             }, 201
         except ValueError as e:
+            current_app.logger.error(f"ValueError in create_place: {str(e)}")
             return {"error": str(e)}, 400
+        except Exception as e:
+            import traceback
+            current_app.logger.error(f"Error creating place: {str(e)}")
+            current_app.logger.error(traceback.format_exc())
+            return {"error": f"Unexpected error: {str(e)}", "traceback": traceback.format_exc()}, 500
 
     @place_ns.response(200, "List of places retrieved successfully")
+    @cross_origin()
     def get(self):
         """Retrieve a list of all places."""
         places = facade.get_all_places()
@@ -130,15 +151,16 @@ class PlaceResource(Resource):
     @place_ns.response(403, "Unauthorized action")
     def put(self, place_id):
         """Update a place's information. Admins can update any place."""
-        current_user = get_jwt_identity()
-        is_admin = current_user.get('is_admin', False)
+        current_user_id = get_jwt_identity()
+        claims = get_jwt()
+        is_admin = claims.get('is_admin', False)
         
         place = facade.get_place(place_id)
         if not place:
             return {"error": "Place not found"}, 404
             
         # Allow admins to bypass ownership check
-        if not is_admin and place.owner_id != current_user.get('id'):
+        if not is_admin and place.owner_id != current_user_id:
             return {"error": "Unauthorized action"}, 403
             
         data = request.json
@@ -165,15 +187,16 @@ class PlaceAmenityResource(Resource):
     @place_ns.response(403, "Unauthorized action")
     def post(self, place_id, amenity_id):
         """Link an amenity to a place. Admins can link amenities to any place."""
-        current_user = get_jwt_identity()
-        is_admin = current_user.get('is_admin', False)
+        current_user_id = get_jwt_identity()
+        claims = get_jwt()
+        is_admin = claims.get('is_admin', False)
         
         place = facade.get_place(place_id)
         if not place:
             return {"error": "Place not found"}, 404
             
         # Allow admins to bypass ownership check
-        if not is_admin and place.owner_id != current_user.get('id'):
+        if not is_admin and place.owner_id != current_user_id:
             return {"error": "Unauthorized action"}, 403
             
         try:
