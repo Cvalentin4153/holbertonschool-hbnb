@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Review</title>
+    <title>Add Review - HBnB</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -13,49 +13,54 @@
                 <img src="images/logo.png" alt="hbnb">
             </a>
         </div>
-        <nav>
+        <nav class="review-nav">
             <a href="index.html" class="home-button">Home</a>
-            <a href="login.html" id="login-link" class="login-button">Login</a>
+            <a href="login.html" id="login-link" class="login-button" style="display: none;">Login</a>
             <a href="#" id="logout-button" class="logout-button" style="display: none;">Logout</a>
         </nav>
     </header>
 
     <main>
-        <div class="review-container">
-            <h1 id="review-title">Reviewing: <span id="place-name">Loading...</span></h1>
+        <div class="auth-container">
+            <h1>Write a Review</h1>
+            <p id="review-title" class="auth-link">Reviewing: <span id="place-name">Loading place details...</span></p>
             
-            <div id="error-message" class="error-message"></div>
-            <div id="success-message" class="success-message"></div>
+            <div id="error-message" class="error-message" style="display: none;"></div>
+            <div id="success-message" class="success-message" style="display: none;"></div>
             
-            <div class="add-review">
-                <h2>Add a Review</h2>
-                <form id="review-form" class="form">
-                    <div class="form-group">
-                        <label for="review">Your Review:</label>
-                        <textarea id="review" name="review" required></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="rating">Rating:</label>
-                        <select id="rating" name="rating" required>
-                            <option value="1">1 Star</option>
-                            <option value="2">2 Stars</option>
-                            <option value="3">3 Stars</option>
-                            <option value="4">4 Stars</option>
-                            <option value="5" selected>5 Stars</option>
-                        </select>
-                    </div>
-                    
-                    <button type="submit" class="submit-button">Submit Review</button>
-                </form>
-            </div>
+            <form id="review-form" class="form">
+                <div class="form-group">
+                    <label for="review-text">Your Review:</label>
+                    <textarea id="review-text" name="review" rows="10" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="rating">Rating:</label>
+                    <select id="rating" name="rating" required>
+                        <option value="1">1 Star</option>
+                        <option value="2">2 Stars</option>
+                        <option value="3">3 Stars</option>
+                        <option value="4">4 Stars</option>
+                        <option value="5" selected>5 Stars</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="submit-button">Submit Review</button>
+            </form>
         </div>
     </main>
 
     <footer>
         <p>© 2024 HBnB Evolution. All rights reserved.</p>
     </footer>
-    
+
     <script src="scripts.js"></script>
+    <script>
+        // Initialize the review form when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Add review page loaded, initializing review form');
+            initializeReviewForm();
+        });
+    </script>
 </body>
 </html>

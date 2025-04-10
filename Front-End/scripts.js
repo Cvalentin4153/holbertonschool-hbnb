@@ -226,13 +226,21 @@ document.addEventListener('DOMContentLoaded', () => {
       addReviewLink.addEventListener('click', (e) => {
         e.preventDefault();
         const placeId = getUrlParameter('id');
+        const token = getCookie('token');
+        
+        if (!token) {
+          window.location.href = 'login.html';
+          return;
+        }
+        
+        // Redirect to add_review.html with the place_id parameter
         window.location.href = `add_review.html?place_id=${placeId}`;
       });
     }
   }
 
   // Check if we're on the add review page
-  if (document.querySelector('.review-container')) {
+  if (window.location.pathname.includes('add_review.html')) {
     initializeReviewForm();
   }
 });
@@ -583,6 +591,19 @@ function getUrlParameter(name) {
     return urlParams.get(name);
 }
 
+// Function to format date
+function formatDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return ''; // Return empty string if invalid date
+    
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+}
+
 // Function to fetch and display place details
 async function fetchPlaceDetails() {
     const placeId = getUrlParameter('id');
@@ -611,20 +632,32 @@ async function fetchPlaceDetails() {
             }
         }
 
+        console.log('Fetching place details for ID:', placeId);
         const response = await fetch(`http://127.0.0.1:5001/api/v1/places/${placeId}`, {
             method: 'GET',
             headers: headers
         });
+
+        if (response.status === 401) {
+            // Token has expired or is invalid
+            console.log('Token expired or invalid, clearing token and redirecting to login');
+            document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            window.location.href = 'login.html';
+            return;
+        }
 
         if (!response.ok) {
             throw new Error(`Failed to fetch place details: ${response.status}`);
         }
 
         const place = await response.json();
+        console.log('Received place details:', place);
         displayPlaceDetails(place);
     } catch (error) {
         console.error('Error fetching place details:', error);
-        loadingMessage.textContent = 'Error loading place details. Please try again later.';
+        if (loadingMessage) {
+            loadingMessage.textContent = 'Error loading place details. Please try again later.';
+        }
     }
 }
 
@@ -664,13 +697,18 @@ function displayPlaceDetails(place) {
             
             // Create the stars display
             const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+            const formattedDate = formatDate(review.created_at);
             
             reviewElement.innerHTML = `
                 <div class="review-header">
-                    <p class="rating">Rating: ${stars}</p>
-                    <p class="review-date">${new Date(review.created_at).toLocaleDateString()}</p>
+                    <div class="review-rating-date">
+                        <p class="rating">${stars}</p>
+                        ${formattedDate ? `<p class="review-date">${formattedDate}</p>` : ''}
+                    </div>
                 </div>
-                <p class="review-text">${review.text}</p>
+                <div class="review-content">
+                    <p class="review-text">${review.text}</p>
+                </div>
             `;
             reviewsList.appendChild(reviewElement);
         });
@@ -686,10 +724,22 @@ function displayPlaceDetails(place) {
 // Function to submit a review
 async function submitReview(event) {
     event.preventDefault();
-    const placeId = getUrlParameter('id');
+    console.log('submitReview function called');
+    
+    let placeId = getUrlParameter('id');
+    console.log('Initial placeId from id parameter:', placeId);
+    
+    // If no 'id' parameter is found, check for 'place_id' parameter
+    if (!placeId) {
+        placeId = getUrlParameter('place_id');
+        console.log('placeId from place_id parameter:', placeId);
+    }
+    
     const token = getCookie('token');
+    console.log('Token exists:', !!token);
     
     if (!token || !placeId) {
+        console.log('Missing token or placeId, redirecting to login');
         window.location.href = 'login.html';
         return;
     }
@@ -719,8 +769,9 @@ async function submitReview(event) {
             })
         });
 
+        console.log('Review submission response status:', response.status);
         const data = await response.json();
-        console.log('Review submission response:', data);
+        console.log('Review submission response data:', data);
         
         if (response.status === 401) {
             // Token has expired or is invalid
@@ -729,9 +780,14 @@ async function submitReview(event) {
             window.location.href = 'login.html';
             return;
         }
-
+        
         if (!response.ok) {
-            throw new Error(data.error || data.msg || 'Failed to submit review');
+            console.error('Error submitting review:', data.error || 'Unknown error');
+            if (errorMessage) {
+                errorMessage.textContent = data.error || 'Error submitting review. Please try again.';
+                errorMessage.style.display = 'block';
+            }
+            return;
         }
 
         // Show success message if element exists
@@ -746,10 +802,18 @@ async function submitReview(event) {
         document.getElementById('review-text').value = '';
         document.getElementById('rating').value = '5';
 
-        // Refresh the place details after a short delay
-        setTimeout(() => {
-            fetchPlaceDetails();
-        }, 1500);
+        // Check if we're on the add_review.html page
+        if (window.location.pathname.includes('add_review.html')) {
+            // Redirect back to the place details page
+            setTimeout(() => {
+                window.location.href = `place.html?id=${placeId}`;
+            }, 1500);
+        } else {
+            // Refresh the place details after a short delay
+            setTimeout(() => {
+                fetchPlaceDetails();
+            }, 1500);
+        }
     } catch (error) {
         console.error('Error submitting review:', error);
         // Show error message if element exists
@@ -764,7 +828,11 @@ async function submitReview(event) {
 
 // Function to handle review form initialization
 async function initializeReviewForm() {
+    console.log('Initializing review form');
+    
     const token = getCookie('token');
+    console.log('Token for review form:', token ? 'exists' : 'missing');
+    
     if (!token) {
         console.log('No token found, redirecting to login');
         window.location.href = 'login.html';
@@ -772,6 +840,8 @@ async function initializeReviewForm() {
     }
 
     const placeId = getUrlParameter('place_id');
+    console.log('Place ID for review:', placeId);
+    
     if (!placeId) {
         console.log('No place ID found, redirecting to index');
         window.location.href = 'index.html';
@@ -780,6 +850,7 @@ async function initializeReviewForm() {
 
     // Fetch place details to display the name
     try {
+        console.log('Fetching place details for ID:', placeId);
         const response = await fetch(`http://127.0.0.1:5001/api/v1/places/${placeId}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -787,10 +858,11 @@ async function initializeReviewForm() {
         });
 
         if (!response.ok) {
-            throw new Error('Failed to fetch place details');
+            throw new Error(`Failed to fetch place details: ${response.status}`);
         }
 
         const place = await response.json();
+        console.log('Place details fetched:', place.title);
         document.getElementById('place-name').textContent = place.title;
     } catch (error) {
         console.error('Error fetching place details:', error);
@@ -802,7 +874,10 @@ async function initializeReviewForm() {
     // Set up form submission handler
     const reviewForm = document.getElementById('review-form');
     if (reviewForm) {
+        console.log('Review form found, adding submit event listener');
         reviewForm.addEventListener('submit', submitReview);
+    } else {
+        console.error('Review form element not found!');
     }
 }
 
