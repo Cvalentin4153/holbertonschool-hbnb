@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   checkAuthentication();
 
   // Additional setup for index page
-  if (document.getElementById('places-list')) {
+  if (document.querySelector('.places-list')) {
     // Set up price filter listener
     if (priceFilter) {
       priceFilter.addEventListener('change', (e) => {
@@ -209,6 +209,32 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check login status when page loads
     checkLoginStatus();
   });
+
+  // Check if we're on the place details page
+  if (document.getElementById('place-content')) {
+    fetchPlaceDetails();
+
+    // Set up review form submission
+    const reviewForm = document.getElementById('review-form');
+    if (reviewForm) {
+      reviewForm.addEventListener('submit', submitReview);
+    }
+
+    // Set up detailed review link
+    const addReviewLink = document.getElementById('add-review-link');
+    if (addReviewLink) {
+      addReviewLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        const placeId = getUrlParameter('id');
+        window.location.href = `add_review.html?place_id=${placeId}`;
+      });
+    }
+  }
+
+  // Check if we're on the add review page
+  if (document.querySelector('.review-container')) {
+    initializeReviewForm();
+  }
 });
 
 async function loginUser(email, password) {
@@ -314,13 +340,22 @@ function getCookie(name) {
 
 function checkAuthentication() {
   const token = getCookie('token');
+  console.log('Checking authentication on page:', window.location.pathname);
+  console.log('Token:', token ? 'exists' : 'does not exist');
+
+  if (token && isTokenExpired(token)) {
+    console.log('Token is expired, clearing and redirecting to login');
+    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    if (!window.location.pathname.includes('login.html')) {
+      window.location.href = 'login.html';
+    }
+    return;
+  }
+
   const loginLink = document.getElementById('login-link');
   const logoutButton = document.getElementById('logout-button');
   const createPlaceBtn = document.getElementById('create-place-btn');
   const currentPage = window.location.pathname;
-
-  console.log('Checking authentication on page:', currentPage);
-  console.log('Token:', token ? 'exists' : 'does not exist');
 
   // If we're on login or signup page, don't show either button
   if (currentPage.includes('login.html') || currentPage.includes('signup.html')) {
@@ -328,15 +363,15 @@ function checkAuthentication() {
     if (logoutButton) logoutButton.style.display = 'none';
     if (createPlaceBtn) createPlaceBtn.style.display = 'none';
     
-    // If user is already logged in, redirect to index
-    if (token) {
+    // If user is already logged in with valid token, redirect to index
+    if (token && !isTokenExpired(token)) {
       window.location.href = 'index.html';
     }
     return;
   }
 
-  // For other pages (like index.html)
-  if (!token) {
+  // For other pages
+  if (!token || isTokenExpired(token)) {
     if (loginLink) {
       loginLink.style.display = 'block';
       console.log('Showing login link');
@@ -381,6 +416,7 @@ function logout() {
   window.location.href = 'login.html';
 }
 
+// Global variable to store places
 let places = [];
 let currentPriceFilter = 'all';
 
@@ -390,6 +426,7 @@ async function fetchPlaces() {
   const token = getCookie('token');
   
   try {
+    console.log('Fetching places...');
     loadingMessage.style.display = 'block';
     placesList.innerHTML = '';
 
@@ -399,6 +436,7 @@ async function fetchPlaces() {
     
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
+      console.log('Using token for authentication');
     }
 
     const response = await fetch('http://127.0.0.1:5001/api/v1/places/', {
@@ -406,18 +444,22 @@ async function fetchPlaces() {
       headers: headers
     });
 
+    console.log('Response status:', response.status);
+
     if (response.status === 401) {
-      // Token is invalid or expired
+      console.log('Token is invalid or expired');
       document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
       window.location.href = 'login.html';
       return;
     }
 
     if (!response.ok) {
-      throw new Error('Failed to fetch places');
+      throw new Error(`Failed to fetch places: ${response.status}`);
     }
 
-    places = await response.json();
+    const data = await response.json();
+    console.log('Fetched places:', data);
+    places = data; // Store in global variable
     displayPlaces(places);
   } catch (error) {
     console.error('Error fetching places:', error);
@@ -429,6 +471,7 @@ async function fetchPlaces() {
 
 function displayPlaces(placesToShow) {
   const placesList = document.querySelector('.places-list');
+  console.log('Displaying places:', placesToShow);
   placesList.innerHTML = '';
 
   if (!placesToShow || placesToShow.length === 0) {
@@ -437,11 +480,11 @@ function displayPlaces(placesToShow) {
   }
 
   placesToShow.forEach(place => {
+    console.log('Creating card for place:', place);
     const placeCard = document.createElement('div');
     placeCard.className = 'place-card';
     placeCard.innerHTML = `
       <h3>${place.title || 'Unnamed Place'}</h3>
-      <p class="description">${place.description || 'No description available'}</p>
       <p class="price">Price per night: $${place.price || 0}</p>
       <button class="view-button" onclick="window.location.href='place.html?id=${place.id}'">View Details</button>
     `;
@@ -531,5 +574,248 @@ async function createPlace(event) {
         const errorElement = document.getElementById('error-message');
         errorElement.textContent = 'An error occurred while creating the place. Please try again.';
         errorElement.style.display = 'block';
+    }
+}
+
+// Function to get URL parameters
+function getUrlParameter(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+}
+
+// Function to fetch and display place details
+async function fetchPlaceDetails() {
+    const placeId = getUrlParameter('id');
+    if (!placeId) {
+        window.location.href = 'index.html';
+        return;
+    }
+
+    const loadingMessage = document.getElementById('place-loading');
+    const placeContent = document.getElementById('place-content');
+    const addReviewContainer = document.getElementById('add-review-container');
+    const token = getCookie('token');
+
+    try {
+        loadingMessage.style.display = 'block';
+        placeContent.style.display = 'none';
+
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+            if (addReviewContainer) {
+                addReviewContainer.style.display = 'block';
+            }
+        }
+
+        const response = await fetch(`http://127.0.0.1:5001/api/v1/places/${placeId}`, {
+            method: 'GET',
+            headers: headers
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch place details: ${response.status}`);
+        }
+
+        const place = await response.json();
+        displayPlaceDetails(place);
+    } catch (error) {
+        console.error('Error fetching place details:', error);
+        loadingMessage.textContent = 'Error loading place details. Please try again later.';
+    }
+}
+
+// Function to display place details
+function displayPlaceDetails(place) {
+    const loadingMessage = document.getElementById('place-loading');
+    const placeContent = document.getElementById('place-content');
+
+    console.log('Displaying place details:', place);
+
+    // Update title and basic info
+    document.getElementById('place-title').textContent = place.title;
+    document.getElementById('place-host').textContent = `${place.owner.first_name} ${place.owner.last_name}`;
+    document.getElementById('place-price').textContent = `$${place.price}`;
+    document.getElementById('place-description').textContent = place.description || 'No description available';
+
+    // Display amenities
+    const amenitiesContainer = document.getElementById('place-amenities');
+    if (place.amenities && place.amenities.length > 0) {
+        const amenitiesList = place.amenities.map(amenity => amenity.name).join(', ');
+        amenitiesContainer.textContent = amenitiesList;
+    } else {
+        amenitiesContainer.textContent = 'No amenities listed';
+    }
+
+    // Display reviews
+    const reviewsList = document.getElementById('reviews-list');
+    reviewsList.innerHTML = '';
+
+    console.log('Reviews:', place.reviews);
+
+    if (place.reviews && place.reviews.length > 0) {
+        place.reviews.forEach(review => {
+            console.log('Processing review:', review);
+            const reviewElement = document.createElement('div');
+            reviewElement.className = 'review-card';
+            
+            // Create the stars display
+            const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+            
+            reviewElement.innerHTML = `
+                <div class="review-header">
+                    <p class="rating">Rating: ${stars}</p>
+                    <p class="review-date">${new Date(review.created_at).toLocaleDateString()}</p>
+                </div>
+                <p class="review-text">${review.text}</p>
+            `;
+            reviewsList.appendChild(reviewElement);
+        });
+    } else {
+        reviewsList.innerHTML = '<p class="no-reviews">No reviews yet</p>';
+    }
+
+    // Hide loading message and show content
+    loadingMessage.style.display = 'none';
+    placeContent.style.display = 'block';
+}
+
+// Function to submit a review
+async function submitReview(event) {
+    event.preventDefault();
+    const placeId = getUrlParameter('id');
+    const token = getCookie('token');
+    
+    if (!token || !placeId) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    const reviewText = document.getElementById('review-text').value;
+    const rating = parseInt(document.getElementById('rating').value);
+    const errorMessage = document.getElementById('error-message');
+    const successMessage = document.getElementById('success-message');
+
+    // Clear any existing messages if the elements exist
+    if (errorMessage) errorMessage.style.display = 'none';
+    if (successMessage) successMessage.style.display = 'none';
+
+    try {
+        console.log('Submitting review:', { text: reviewText, rating, place_id: placeId });
+        
+        const response = await fetch('http://127.0.0.1:5001/api/v1/reviews/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                text: reviewText,
+                rating: rating,
+                place_id: placeId
+            })
+        });
+
+        const data = await response.json();
+        console.log('Review submission response:', data);
+        
+        if (response.status === 401) {
+            // Token has expired or is invalid
+            console.log('Token expired or invalid, clearing token and redirecting to login');
+            document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            window.location.href = 'login.html';
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(data.error || data.msg || 'Failed to submit review');
+        }
+
+        // Show success message if element exists
+        if (successMessage) {
+            successMessage.textContent = 'Review submitted successfully!';
+            successMessage.style.display = 'block';
+        } else {
+            console.log('Review submitted successfully!');
+        }
+
+        // Clear the form
+        document.getElementById('review-text').value = '';
+        document.getElementById('rating').value = '5';
+
+        // Refresh the place details after a short delay
+        setTimeout(() => {
+            fetchPlaceDetails();
+        }, 1500);
+    } catch (error) {
+        console.error('Error submitting review:', error);
+        // Show error message if element exists
+        if (errorMessage) {
+            errorMessage.textContent = error.message;
+            errorMessage.style.display = 'block';
+        } else {
+            console.error('Error message:', error.message);
+        }
+    }
+}
+
+// Function to handle review form initialization
+async function initializeReviewForm() {
+    const token = getCookie('token');
+    if (!token) {
+        console.log('No token found, redirecting to login');
+        window.location.href = 'login.html';
+        return;
+    }
+
+    const placeId = getUrlParameter('place_id');
+    if (!placeId) {
+        console.log('No place ID found, redirecting to index');
+        window.location.href = 'index.html';
+        return;
+    }
+
+    // Fetch place details to display the name
+    try {
+        const response = await fetch(`http://127.0.0.1:5001/api/v1/places/${placeId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch place details');
+        }
+
+        const place = await response.json();
+        document.getElementById('place-name').textContent = place.title;
+    } catch (error) {
+        console.error('Error fetching place details:', error);
+        alert('Error loading place details');
+        window.location.href = 'index.html';
+        return;
+    }
+
+    // Set up form submission handler
+    const reviewForm = document.getElementById('review-form');
+    if (reviewForm) {
+        reviewForm.addEventListener('submit', submitReview);
+    }
+}
+
+// Function to check if token is expired
+function isTokenExpired(token) {
+    if (!token) return true;
+    
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const expirationTime = payload.exp * 1000; // Convert to milliseconds
+        return Date.now() >= expirationTime;
+    } catch (error) {
+        console.error('Error checking token expiration:', error);
+        return true;
     }
 }

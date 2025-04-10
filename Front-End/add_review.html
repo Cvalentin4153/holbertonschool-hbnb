@@ -14,13 +14,18 @@
             </a>
         </div>
         <nav>
+            <a href="index.html" class="home-button">Home</a>
             <a href="login.html" id="login-link" class="login-button">Login</a>
+            <a href="#" id="logout-button" class="logout-button" style="display: none;">Logout</a>
         </nav>
     </header>
 
     <main>
         <div class="review-container">
-            <h1 id="review-title">Reviewing: <span id="place-name">Beautiful Beach House</span></h1>
+            <h1 id="review-title">Reviewing: <span id="place-name">Loading...</span></h1>
+            
+            <div id="error-message" class="error-message"></div>
+            <div id="success-message" class="success-message"></div>
             
             <div class="add-review">
                 <h2>Add a Review</h2>
