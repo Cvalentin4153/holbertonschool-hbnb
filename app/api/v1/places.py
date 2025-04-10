@@ -129,13 +129,16 @@ class PlaceResource(Resource):
     @place_ns.response(400, "Invalid input data")
     @place_ns.response(403, "Unauthorized action")
     def put(self, place_id):
-        """Update a place's information."""
-        current_user_id = get_jwt_identity()
+        """Update a place's information. Admins can update any place."""
+        current_user = get_jwt_identity()
+        is_admin = current_user.get('is_admin', False)
+        
         place = facade.get_place(place_id)
         if not place:
             return {"error": "Place not found"}, 404
             
-        if place.owner_id != current_user_id:
+        # Allow admins to bypass ownership check
+        if not is_admin and place.owner_id != current_user.get('id'):
             return {"error": "Unauthorized action"}, 403
             
         data = request.json
@@ -161,13 +164,16 @@ class PlaceAmenityResource(Resource):
     @place_ns.response(404, "Place or amenity not found")
     @place_ns.response(403, "Unauthorized action")
     def post(self, place_id, amenity_id):
-        """Link an amenity to a place."""
-        current_user_id = get_jwt_identity()
+        """Link an amenity to a place. Admins can link amenities to any place."""
+        current_user = get_jwt_identity()
+        is_admin = current_user.get('is_admin', False)
+        
         place = facade.get_place(place_id)
         if not place:
             return {"error": "Place not found"}, 404
             
-        if place.owner_id != current_user_id:
+        # Allow admins to bypass ownership check
+        if not is_admin and place.owner_id != current_user.get('id'):
             return {"error": "Unauthorized action"}, 403
             
         try:

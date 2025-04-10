@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loginUser(email, password) {
     try {
+        console.log('Attempting login with email:', email);
         const response = await fetch('http://127.0.0.1:5001/api/v1/auth/login', {
             method: 'POST',
             headers: {
@@ -42,17 +43,33 @@ async function loginUser(email, password) {
             body: JSON.stringify({ email, password })
         });
 
+        console.log('Response status:', response.status);
         const data = await response.json();
+        console.log('Response data:', data);
         
         if (response.ok) {
+            console.log('Login successful, setting token');
             document.cookie = `token=${data.access_token}; path=/`;
             window.location.href = 'index.html';
         } else {
-            document.getElementById('error-message').textContent = data.error || 'Invalid email or password';
+            console.error('Login failed:', data.error);
+            const errorMessage = document.getElementById('error-message');
+            if (errorMessage) {
+                errorMessage.textContent = data.error || 'Invalid email or password';
+                errorMessage.style.display = 'block';
+            } else {
+                console.error('Error message element not found');
+            }
         }
     } catch (error) {
         console.error('Login error:', error);
-        document.getElementById('error-message').textContent = 'An error occurred. Please try again.';
+        const errorMessage = document.getElementById('error-message');
+        if (errorMessage) {
+            errorMessage.textContent = 'An error occurred. Please try again.';
+            errorMessage.style.display = 'block';
+        } else {
+            console.error('Error message element not found');
+        }
     }
 }
 

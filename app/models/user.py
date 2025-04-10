@@ -4,6 +4,7 @@ from app.models.place import Place
 from app.models.review import Review
 from sqlalchemy.orm import relationship
 from extensions import db, bcrypt
+from app.models.associations import user_reviews
 
 
 class User(BaseModel):
@@ -18,6 +19,7 @@ class User(BaseModel):
     places = relationship("Place", back_populates="owner", cascade="all, delete-orphan")
     reviews = relationship("Review", back_populates="user", cascade="all, delete-orphan")
     added_amenities = relationship("Amenity", secondary="user_amenities", back_populates="users")
+    user_reviews = relationship("Review", secondary=user_reviews, back_populates="reviewers")
 
     def __init__(self, first_name, last_name, email, password, is_admin=False,):
         super().__init__()
@@ -25,7 +27,7 @@ class User(BaseModel):
         self.last_name = self.validate_name(last_name)
         self.email = self.validate_email(email)
         self.is_admin = bool(is_admin)
-        self.password = self.hash_password(password)
+        self.password = password  # Store the raw password, it will be hashed by create_user
         self.places = []
         self.reviews = []
 

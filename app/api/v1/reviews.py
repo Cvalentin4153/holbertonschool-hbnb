@@ -98,13 +98,16 @@ class ReviewResource(Resource):
     @review_ns.response(400, "Invalid input data")
     @review_ns.response(403, "Unauthorized action")
     def put(self, review_id):
-        """Update a review's information."""
-        current_user_id = get_jwt_identity()
+        """Update a review's information. Admins can update any review."""
+        current_user = get_jwt_identity()
+        is_admin = current_user.get('is_admin', False)
+        
         review = facade.get_review(review_id)
         if not review:
             return {"error": "Review not found"}, 404
             
-        if review.user_id != current_user_id:
+        # Allow admins to bypass ownership check
+        if not is_admin and review.user_id != current_user.get('id'):
             return {"error": "Unauthorized action"}, 403
             
         data = request.json
@@ -125,13 +128,16 @@ class ReviewResource(Resource):
     @review_ns.response(404, "Review not found")
     @review_ns.response(403, "Unauthorized action")
     def delete(self, review_id):
-        """Delete a review."""
-        current_user_id = get_jwt_identity()
+        """Delete a review. Admins can delete any review."""
+        current_user = get_jwt_identity()
+        is_admin = current_user.get('is_admin', False)
+        
         review = facade.get_review(review_id)
         if not review:
             return {"error": "Review not found"}, 404
             
-        if review.user_id != current_user_id:
+        # Allow admins to bypass ownership check
+        if not is_admin and review.user_id != current_user.get('id'):
             return {"error": "Unauthorized action"}, 403
             
         try:

@@ -32,9 +32,23 @@ class Login(Resource):
             current_app.logger.debug("Invalid password")
             return {'error': 'Invalid credentials'}, 401
 
-        # Step 3: Create a JWT token with just the user's id
-        access_token = create_access_token(identity=str(user.id))
+        # Step 3: Create a JWT token with user's id and admin status
+        access_token = create_access_token(
+            identity={
+                'id': str(user.id),
+                'is_admin': user.is_admin
+            }
+        )
         current_app.logger.debug("Token created successfully")
         
-        # Step 4: Return the JWT token to the client
-        return {'access_token': access_token}, 200 
+        # Step 4: Return the JWT token and user info to the client
+        return {
+            'access_token': access_token,
+            'user': {
+                'id': user.id,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'is_admin': user.is_admin
+            }
+        }, 200 

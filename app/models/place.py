@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from app.models.basemodel import BaseModel
 from app.models.amenity import Amenity
-from app.models.associations import places_amenities
+from app.models.associations import places_amenities, places_reviews
 from extensions import db
 from datetime import datetime
 from sqlalchemy.orm import relationship
@@ -28,6 +28,7 @@ class Place(BaseModel):
     owner = relationship("User", back_populates="places")
     reviews = relationship("Review", back_populates="place", cascade="all, delete-orphan")
     amenities = relationship("Amenity", secondary=places_amenities, back_populates="places")
+    place_reviews = relationship("Review", secondary=places_reviews, back_populates="reviewed_places")
 
     def __init__(self, title, description, price, latitude, longitude, owner):
         super().__init__()

@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from app.models.basemodel import BaseModel
 from extensions import db
 from sqlalchemy.orm import relationship
+from app.models.associations import user_reviews, places_reviews
 
 if TYPE_CHECKING:
     from app.models.place import Place
@@ -19,6 +20,8 @@ class Review(BaseModel):
 
     place = relationship("Place", back_populates="reviews")
     user = relationship("User", back_populates="reviews")
+    reviewers = relationship("User", secondary=user_reviews, back_populates="user_reviews")
+    reviewed_places = relationship("Place", secondary=places_reviews, back_populates="place_reviews")
 
     def __init__(self, text, rating, place, user):
         super().__init__()
