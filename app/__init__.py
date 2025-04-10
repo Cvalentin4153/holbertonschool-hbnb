@@ -8,17 +8,31 @@ from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 
 jwt = JWTManager()
-cors = CORS()
 
 def create_app(config_class="config.DevelopmentConfig"):
     app = Flask(__name__)
     app.config.from_object(config_class)
     
+    # Disable strict slashes
+    app.url_map.strict_slashes = False
+    
     # Initialize extensions
     bcrypt.init_app(app)
     db.init_app(app)
     jwt.init_app(app)
-    cors.init_app(app, resources={r"/api/*": {"origins": "*"}})
+    
+    # Configure CORS
+    app.config['CORS_HEADERS'] = 'Content-Type'
+    CORS(app, 
+         resources={
+             r"/api/*": {
+                 "origins": ["http://127.0.0.1:3000", "http://localhost:3000"],
+                 "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+                 "allow_headers": ["Content-Type", "Authorization"],
+                 "supports_credentials": True
+             }
+         })
+    
     migrate = Migrate(app, db)
     
     # Register blueprints
