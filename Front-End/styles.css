@@ -54,15 +54,15 @@ header {
     display: flex;
     gap: 2rem;
     align-items: center;
+    color: #fff;
+    text-decoration: none;
+    font-size: 1rem;
 }
 
-.nav-links a {
-    text-decoration: none;
+.signup-nav-link {
     color: #fff;
-    font-weight: 500;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    transition: background-color 0.3s;
+    text-decoration: none;
+    font-size: 1rem;
 }
 
 .nav-links a:hover {
